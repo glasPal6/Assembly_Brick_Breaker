@@ -35,5 +35,12 @@ $ qemu-system-x86_64 brick_breaker
 ## Resources
 
 - [x86 and amd64 istruction reference](https://www.felixcloutier.com/x86/index.html)
+- [x86 and amd64 register reference Link 1](https://www.eecg.utoronto.ca/~amza/www.mindsec.com/files/x86regs.html)
+- [x86 and amd64 register reference Link 2](https://en.wikibooks.org/wiki/X86_Assembly/X86_Architecture)
 
+- [VGA Modes and Memory](https://wiki.osdev.org/Drawing_In_a_Linear_Framebuffer)
+- [Interupt 10h Link 1](http://www.ctyme.com/intr/int-10.htm)
+- [Interupt 10h Link 2 go to *int 10,0*](https://stanislavs.org/helppc/int_10.html)
+- [Keyboard Interupts Link 1](http://www.ctyme.com/intr/int-16.htm)
+- [KeyboardI nterupt 16h Link 2 go to *int 16,x*](https://stanislavs.org/helppc/int_16.html)
 

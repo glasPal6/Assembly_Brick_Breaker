@@ -5,7 +5,7 @@ all: brick_breaker.asm
 
 .PHONY: run
 run: all
-	qemu-system-x86_64 -monitor stdio brick_breaker
+	qemu-system-i386 -monitor stdio brick_breaker
 
 .PHONY: clean
 clean:
