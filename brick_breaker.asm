@@ -3,42 +3,42 @@
     %define SCREEN_WIDTH 320
     %define SCREEN_HEIGHT 200
 
-    %define COLOR_BLACK 0
-    %define COLOR_BLUE 1
-    %define COLOR_GREEN 2
-    %define COLOR_CYAN 3
-    %define COLOR_RED 4
-    %define COLOR_MAGENTA 5
-    %define COLOR_BROWN 6
-    %define COLOR_LIGHTGRAY 7
-    %define COLOR_DRAKGRAY 8
-    %define COLOR_LIGHTBLUE 9
-    %define COLOR_LIGHTGREEN 10
-    %define COLOR_LIGHTCYAN 11
-    %define COLOR_LIGHTRED 12
-    %define COLOR_LIGHTMAGENTA 13
-    %define COLOR_YELLOW 14
-    %define COLOR_WHITE 15
+    %define COLOUR_BLACK 0
+    %define COLOUR_BLUE 1
+    %define COLOUR_GREEN 2
+    %define COLOUR_CYAN 3
+    %define COLOUR_RED 4
+    %define COLOUR_MAGENTA 5
+    %define COLOUR_BROWN 6
+    %define COLOUR_LIGHTGRAY 7
+    %define COLOUR_DRAKGRAY 8
+    %define COLOUR_LIGHTBLUE 9
+    %define COLOUR_LIGHTGREEN 10
+    %define COLOUR_LIGHTCYAN 11
+    %define COLOUR_LIGHTRED 12
+    %define COLOUR_LIGHTMAGENTA 13
+    %define COLOUR_YELLOW 14
+    %define COLOUR_WHITE 15
 
     %define VGA_MEM_OFFSET 0A000h
 
-    %define PADDLE_Y 150
+    %define PADDLE_Y 180
     %define PADDLE_WIDTH 50
-    %define PADDLE_HEIGHT 5
+    %define PADDLE_HEIGHT 3
     %define PADDLE_VEL 5
 
-    %define BALL_WIDTH 3
-    %define BALL_HEIGHT 3
+    %define BALL_WIDTH 5
+    %define BALL_HEIGHT 5
     %define BALL_VELX 1
     %define BALL_VELY 1
 
 struc State
+    .time: resb 1
     .paddle_x: resw 1
     ; paddle_y is a constant
     .ball_x: resw 1
     .ball_y: resw 1
-    .ball_velx: resw BALL_VELX
-    .ball_vely: resw BALL_VELY
+    .ball_vel: resb 1
 endstruc
 
 ; Main program
@@ -47,12 +47,25 @@ main:
     jmp .draw_paddle
 
     .loop:
+        ; Get system time
+        ;mov ah, 2dh
+        ;int 0x21
+        ;cmp dl, [state + State.time]
+        ;je .loop
+        ;mov [state + State.time], dl
+        ;jmp .draw_paddle
+
         ; Get key pressed
         mov ah, 0x1
         int 0x16
         jz .loop
 
-        xor ah, ah
+    .key_pressed:
+        ; Clear the screen
+        mov ax, 0x13
+        int 0x10
+
+        mov ah, 0
         int 0x16
         
         ; Possible keys
@@ -70,31 +83,26 @@ main:
 
     .paddle_right: 
         ; Increase paddle_x
-        mov ax, [state + State.paddle_x]
-        add ax, PADDLE_VEL
-        mov [state + State.paddle_x], ax
+        mov ax, PADDLE_VEL
+        add [state + State.paddle_x], ax
 
         jmp .draw_paddle
 
     .paddle_left:
         ; Decrease paddle_x
-        mov ax, [state + State.paddle_x]
-        sub ax, PADDLE_VEL
-        mov [state + State.paddle_x], ax
+        mov ax, PADDLE_VEL
+        sub [state + State.paddle_x], ax
     ; NB: Possible fall through
         jmp .draw_paddle
 
     .draw_paddle:
-        ; Clear the screen    
-        mov ax, 0x13
-        int 0x10
         ; Draw the paddle
         mov dx, PADDLE_Y
         mov cx, [state + State.paddle_x]
         .draw_paddle_loop:
             ; Draw the width
             mov ah, 0ch
-            mov al, COLOR_GREEN
+            mov al, COLOUR_GREEN
             int 0x10
             inc cx
             mov ax, cx
@@ -117,7 +125,7 @@ main:
         .draw_ball_loop:
             ; Draw the width
             mov ah, 0ch
-            mov al, COLOR_RED
+            mov al, COLOUR_RED
             int 0x10
             inc cx
             mov ax, cx
@@ -134,12 +142,65 @@ main:
             jng .draw_ball_loop
 
         ; Move the ball
-        mov ax, [state + State.ball_x]
-        add ax, [state + State.ball_velx]
-        mov [state + State.ball_x], ax
-        mov ax, [state + State.ball_y]
-        add ax, [state + State.ball_vely]
-        mov [state + State.ball_y], ax
+        .move_ball_x:
+            mov ax, [state + State.ball_vel]
+            and ax, 01h
+            cmp ax, 0
+            jz .change_ball_velx_neg
+            .change_ball_velx_pos:
+                mov ax, BALL_VELX
+                add [state + State.ball_x], ax
+                jmp .move_ball_y
+            .change_ball_velx_neg:
+                mov ax, BALL_VELX
+                sub [state + State.ball_x], ax
+
+        .move_ball_y:
+            mov ax, [state + State.ball_vel]
+            shr ax, 1
+            cmp ax, 0
+            jz .change_ball_vely_neg
+            .change_ball_vely_pos:
+                mov ax, BALL_VELY
+                add [state + State.ball_y], ax
+                jmp .check_ball_x
+            .change_ball_vely_neg:
+                mov ax, BALL_VELY
+                sub [state + State.ball_y], ax
+
+        ; Ball bounds logic
+        ; if (ball_x <= 0) or (ball_x >= SCREEN_WIDTH - BALL_WIDTH) change ball_velx
+        .check_ball_x:
+        ;    mov ax, [state + State.ball_x]
+        ;    cmp ax, 0
+        ;    jle .check_ball_velx
+        ;
+        ;    mov ax, [state + State.ball_x]
+        ;    add ax, BALL_WIDTH
+        ;    cmp ax, SCREEN_WIDTH
+        ;    jge .check_ball_velx
+        ;
+        ;    jmp .check_ball_y
+        ;
+        ;    .check_ball_velx:
+        ;        xor byte [state + State.ball_velx], 0fh
+        ; if (ball_y <= 0) check ball_vely
+        .check_ball_y:
+        ;    mov ax, [state + State.ball_y]
+        ;    cmp ax, 0
+        ;    jg .check_ball_y_bottom
+        ;    .check_ball_vely:
+        ;        xor byte [state + State.ball_vely], 0fh
+        ;
+        ; Check if the ball is off the bottom of the screen
+        ; if (ball_y >= SCREEN_HEIGHT - BALL_HEIGHT)
+        .check_ball_y_bottom:
+        ;    mov ax, [state + State.ball_y]
+        ;    add ax, BALL_HEIGHT
+        ;    cmp ax, SCREEN_HEIGHT
+        ;    jge main
+        
+        ; Check if the ball is hitting the paddle
         
         jmp .loop
 
@@ -151,11 +212,13 @@ set_graphics:
 
 state:
 istruc State
+    at State.time, db 0
     at State.paddle_x, dw 110
-    at State.ball_x, dw 160
-    at State.ball_y, dw 100
-    at State.ball_velx, dw 1
-    at State.ball_vely, dw 1
+    ;at State.ball_x, dw 160
+    ;at State.ball_y, dw 100
+    at State.ball_x, dw 20
+    at State.ball_y, dw 10
+    at State.ball_vel, db 0x03
 iend
 
 ; Check if the correct amount of memory is used

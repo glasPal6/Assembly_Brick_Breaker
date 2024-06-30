@@ -42,5 +42,7 @@ $ qemu-system-x86_64 brick_breaker
 - [Interupt 10h Link 1](http://www.ctyme.com/intr/int-10.htm)
 - [Interupt 10h Link 2 go to *int 10,0*](https://stanislavs.org/helppc/int_10.html)
 - [Keyboard Interupts Link 1](http://www.ctyme.com/intr/int-16.htm)
-- [KeyboardI nterupt 16h Link 2 go to *int 16,x*](https://stanislavs.org/helppc/int_16.html)
+- [Keyboard Interupts 16h Link 2 go to *int 16,x*](https://stanislavs.org/helppc/int_16.html)
+- [Timer Interupts Link 1](http://www.ctyme.com/intr/rb-2703.htm)
+- [Timer Interupts Link 2](https://stanislavs.org/helppc/int_21.html)
 
