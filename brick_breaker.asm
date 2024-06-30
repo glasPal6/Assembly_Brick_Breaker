@@ -25,21 +25,26 @@
     %define PADDLE_Y 150
     %define PADDLE_WIDTH 50
     %define PADDLE_HEIGHT 5
+    %define PADDLE_VEL 5
+
+    %define BALL_WIDTH 3
+    %define BALL_HEIGHT 3
+    %define BALL_VELX 1
+    %define BALL_VELY 1
 
 struc State
     .paddle_x: resw 1
     ; paddle_y is a constant
+    .ball_x: resw 1
+    .ball_y: resw 1
+    .ball_velx: resw BALL_VELX
+    .ball_vely: resw BALL_VELY
 endstruc
-
-state:
-istruc State
-    at State.paddle_x, dw 50
-iend
 
 ; Main program
 main:
     call set_graphics
-    jmp .draw_paddle_initial
+    jmp .draw_paddle
 
     .loop:
         ; Get key pressed
@@ -61,24 +66,32 @@ main:
         jz main
     
         ; No key pressed
-        jmp .loop
+        jmp .draw_paddle
 
-    .paddle_right:
+    .paddle_right: 
         ; Increase paddle_x
+        mov ax, [state + State.paddle_x]
+        add ax, PADDLE_VEL
+        mov [state + State.paddle_x], ax
+
         jmp .draw_paddle
 
     .paddle_left:
         ; Decrease paddle_x
-    ; NB: Potential fall through
+        mov ax, [state + State.paddle_x]
+        sub ax, PADDLE_VEL
+        mov [state + State.paddle_x], ax
+    ; NB: Possible fall through
         jmp .draw_paddle
 
     .draw_paddle:
-        jmp .loop
-
-    .draw_paddle_initial:
+        ; Clear the screen    
+        mov ax, 0x13
+        int 0x10
+        ; Draw the paddle
         mov dx, PADDLE_Y
         mov cx, [state + State.paddle_x]
-        .draw_paddle_initial_loop:
+        .draw_paddle_loop:
             ; Draw the width
             mov ah, 0ch
             mov al, COLOR_GREEN
@@ -87,14 +100,47 @@ main:
             mov ax, cx
             sub ax, [state + State.paddle_x]
             cmp ax, PADDLE_WIDTH
-            jng .draw_paddle_initial_loop
+            jng .draw_paddle_loop
             
             ; Draw the height
             mov cx, [state + State.paddle_x]
+            inc dx
             mov ax, dx
             sub ax, PADDLE_Y
             cmp ax, PADDLE_HEIGHT
-            jng .draw_paddle_initial_loop
+            jng .draw_paddle_loop
+
+    .draw_ball:
+        ; Draw the ball
+        mov dx, [state + State.ball_y]
+        mov cx, [state + State.ball_x]
+        .draw_ball_loop:
+            ; Draw the width
+            mov ah, 0ch
+            mov al, COLOR_RED
+            int 0x10
+            inc cx
+            mov ax, cx
+            sub ax, [state + State.ball_x]
+            cmp ax, BALL_WIDTH
+            jng .draw_ball_loop
+
+            ; Draw the height
+            mov cx, [state + State.ball_x]
+            inc dx
+            mov ax, dx
+            sub ax, [state + State.ball_y]
+            cmp ax, BALL_HEIGHT
+            jng .draw_ball_loop
+
+        ; Move the ball
+        mov ax, [state + State.ball_x]
+        add ax, [state + State.ball_velx]
+        mov [state + State.ball_x], ax
+        mov ax, [state + State.ball_y]
+        add ax, [state + State.ball_vely]
+        mov [state + State.ball_y], ax
+        
         jmp .loop
 
 set_graphics:
@@ -102,6 +148,15 @@ set_graphics:
     mov ax, 0x13
     int 0x10
     ret
+
+state:
+istruc State
+    at State.paddle_x, dw 110
+    at State.ball_x, dw 160
+    at State.ball_y, dw 100
+    at State.ball_velx, dw 1
+    at State.ball_vely, dw 1
+iend
 
 ; Check if the correct amount of memory is used
 ; This has to be at the end of the program
