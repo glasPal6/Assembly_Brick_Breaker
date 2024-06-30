@@ -171,19 +171,20 @@ main:
         ; Ball bounds logic
         ; if (ball_x <= 0) or (ball_x >= SCREEN_WIDTH - BALL_WIDTH) change ball_velx
         .check_ball_x:
-        ;    mov ax, [state + State.ball_x]
-        ;    cmp ax, 0
-        ;    jle .check_ball_velx
-        ;
-        ;    mov ax, [state + State.ball_x]
-        ;    add ax, BALL_WIDTH
-        ;    cmp ax, SCREEN_WIDTH
-        ;    jge .check_ball_velx
-        ;
-        ;    jmp .check_ball_y
-        ;
-        ;    .check_ball_velx:
-        ;        xor byte [state + State.ball_velx], 0fh
+            mov ax, [state + State.ball_x]
+            cmp ax, 0
+            jle .check_ball_velx
+
+            mov ax, [state + State.ball_x]
+            add ax, BALL_WIDTH + 1
+            cmp ax, SCREEN_WIDTH
+            jge .check_ball_velx
+
+            jmp .check_ball_y
+
+            .check_ball_velx:
+                xor byte [state + State.ball_vel], 01h
+
         ; if (ball_y <= 0) check ball_vely
         .check_ball_y:
             mov ax, [state + State.ball_y]
@@ -216,10 +217,10 @@ istruc State
     at State.paddle_x, dw 110
     ;at State.ball_x, dw 160
     ;at State.ball_y, dw 100
-    at State.ball_x, dw 20
+    at State.ball_x, dw 200
     at State.ball_y, dw 10
-    at State.ball_vel, db 0x00 ; up left
-    ;at State.ball_vel, db 0x01 ; up right
+    ;at State.ball_vel, db 0x00 ; up left
+    at State.ball_vel, db 0x01 ; up right
     ;at State.ball_vel, db 0x02 ; down left
     ;at State.ball_vel, db 0x03 ; down right
 iend
