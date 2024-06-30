@@ -164,7 +164,7 @@ main:
 
         .move_ball_y:
             mov ax, [state + State.ball_vel]
-            shr ax, 1
+            and ax, 02h
             cmp ax, 0
             jz .change_ball_vely_neg
             .change_ball_vely_pos:
@@ -203,12 +203,30 @@ main:
         ; Check if the ball is off the bottom of the screen
         ; if (ball_y >= SCREEN_HEIGHT - BALL_HEIGHT)
         .check_ball_y_bottom:
-        ;    mov ax, [state + State.ball_y]
-        ;    add ax, BALL_HEIGHT
-        ;    cmp ax, SCREEN_HEIGHT
-        ;    jge main
+            mov ax, [state + State.ball_y]
+            add ax, BALL_HEIGHT + 1
+            cmp ax, SCREEN_HEIGHT
+            jl .check_ball_paddle
+            .check_ball_vely_bottom:
+                xor byte [state + State.ball_vel], 02h
+            ;jge main
         
         ; Check if the ball is hitting the paddle
+        ; if (PADDLE_Y <= ball_y + BALL_HEIGHT)
+        ; if (paddle_x <= ball_x and ball_x + BALL_WIDTH <= paddle_x + PADDLE_WIDTH)
+        .check_ball_paddle:
+            mov ax, [state + State.ball_y]
+            cmp ax, PADDLE_Y - BALL_HEIGHT
+            jle .loop
+            mov ax, [state + State.ball_x]
+            cmp ax, [state + State.paddle_x]
+            jle .loop
+            mov ax, [state + State.ball_x]
+            add ax, BALL_WIDTH
+            sub ax, PADDLE_WIDTH
+            cmp ax, [state + State.paddle_x]
+            jge .loop
+            xor byte [state + State.ball_vel], 02h
         
         jmp .loop
 
