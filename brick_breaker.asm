@@ -186,12 +186,12 @@ main:
         ;        xor byte [state + State.ball_velx], 0fh
         ; if (ball_y <= 0) check ball_vely
         .check_ball_y:
-        ;    mov ax, [state + State.ball_y]
-        ;    cmp ax, 0
-        ;    jg .check_ball_y_bottom
-        ;    .check_ball_vely:
-        ;        xor byte [state + State.ball_vely], 0fh
-        ;
+            mov ax, [state + State.ball_y]
+            cmp ax, 0
+            jg .check_ball_y_bottom
+            .check_ball_vely:
+                xor byte [state + State.ball_vel], 02h
+
         ; Check if the ball is off the bottom of the screen
         ; if (ball_y >= SCREEN_HEIGHT - BALL_HEIGHT)
         .check_ball_y_bottom:
@@ -218,7 +218,10 @@ istruc State
     ;at State.ball_y, dw 100
     at State.ball_x, dw 20
     at State.ball_y, dw 10
-    at State.ball_vel, db 0x03
+    at State.ball_vel, db 0x00 ; up left
+    ;at State.ball_vel, db 0x01 ; up right
+    ;at State.ball_vel, db 0x02 ; down left
+    ;at State.ball_vel, db 0x03 ; down right
 iend
 
 ; Check if the correct amount of memory is used
