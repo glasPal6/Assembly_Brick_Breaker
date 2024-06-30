@@ -22,15 +22,15 @@
 
     %define VGA_MEM_OFFSET 0A000h
 
-    %define PADDLE_Y 180
+    %define PADDLE_Y 150
     %define PADDLE_WIDTH 50
     %define PADDLE_HEIGHT 3
     %define PADDLE_VEL 5
 
     %define BALL_WIDTH 5
     %define BALL_HEIGHT 5
-    %define BALL_VELX 1
-    %define BALL_VELY 1
+    %define BALL_VELX 2
+    %define BALL_VELY 2
 
 struc State
     .time: resb 1
@@ -84,16 +84,23 @@ main:
     .paddle_right: 
         ; Increase paddle_x
         mov ax, PADDLE_VEL
-        add [state + State.paddle_x], ax
-
+        add ax, [state + State.paddle_x]
+        cmp ax, SCREEN_WIDTH - PADDLE_WIDTH - 1
+        jge .paddle_right_max
+        mov [state + State.paddle_x], ax
         jmp .draw_paddle
+        .paddle_right_max:
+            mov word [state + State.paddle_x], SCREEN_WIDTH - PADDLE_WIDTH - 1
+            jmp .draw_paddle
 
     .paddle_left:
         ; Decrease paddle_x
         mov ax, PADDLE_VEL
         sub [state + State.paddle_x], ax
-    ; NB: Possible fall through
-        jmp .draw_paddle
+        mov ax, [state + State.paddle_x]
+        cmp ax, 0
+        jge .draw_paddle
+        mov word [state + State.paddle_x], 0
 
     .draw_paddle:
         ; Draw the paddle
@@ -220,15 +227,22 @@ istruc State
     at State.ball_x, dw 200
     at State.ball_y, dw 10
     ;at State.ball_vel, db 0x00 ; up left
-    at State.ball_vel, db 0x01 ; up right
+    ;at State.ball_vel, db 0x01 ; up right
     ;at State.ball_vel, db 0x02 ; down left
-    ;at State.ball_vel, db 0x03 ; down right
+    at State.ball_vel, db 0x03 ; down right
 iend
 
 ; Check if the correct amount of memory is used
 ; This has to be at the end of the program
 memory_check:
     ; Make sure the correct amount of memory is used
+    %assign totalMemory $ - $$
+    %warning Memory used: totalMemory bytes
+
     times 510 - ($ - $$) db 0
     dw 0xaa55
+
+    %if $ - $$ != 512
+        %error Too much memory used
+    %endif
 
