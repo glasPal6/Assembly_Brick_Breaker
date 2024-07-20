@@ -39,6 +39,7 @@ struc State
     .ball_x: resw 1
     .ball_y: resw 1
     .ball_vel: resb 1
+    .score: resw 1
 endstruc
 
 ; Main program
@@ -124,6 +125,9 @@ main:
             sub ax, PADDLE_Y
             cmp ax, PADDLE_HEIGHT
             jng .draw_paddle_loop
+
+    .draw_score:
+        ; TODO
 
     .draw_ball:
         ; Draw the ball
@@ -212,12 +216,16 @@ main:
             ;jge main
         
         ; Check if the ball is hitting the paddle
-        ; if (PADDLE_Y <= ball_y + BALL_HEIGHT)
+        ; if (PADDLE_Y <= ball_y + BALL_HEIGHT and ball_y <= PADDLE_Y + PADDLE_HEIGHT)
         ; if (paddle_x <= ball_x and ball_x + BALL_WIDTH <= paddle_x + PADDLE_WIDTH)
         .check_ball_paddle:
             mov ax, [state + State.ball_y]
             cmp ax, PADDLE_Y - BALL_HEIGHT
             jle .loop
+            ; TODO: Remove these lines when game_over is implemented
+            cmp ax, PADDLE_Y + PADDLE_HEIGHT
+            jge .loop
+
             mov ax, [state + State.ball_x]
             cmp ax, [state + State.paddle_x]
             jle .loop
@@ -227,6 +235,11 @@ main:
             cmp ax, [state + State.paddle_x]
             jge .loop
             xor byte [state + State.ball_vel], 02h
+        
+    .update_score:
+            mov ax, [state + State.score]
+            inc ax
+            mov [state + State.score], ax
         
         jmp .loop
 
@@ -240,14 +253,18 @@ state:
 istruc State
     at State.time, db 0
     at State.paddle_x, dw 110
+
     ;at State.ball_x, dw 160
     ;at State.ball_y, dw 100
     at State.ball_x, dw 200
     at State.ball_y, dw 10
+
     ;at State.ball_vel, db 0x00 ; up left
     ;at State.ball_vel, db 0x01 ; up right
     ;at State.ball_vel, db 0x02 ; down left
     at State.ball_vel, db 0x03 ; down right
+
+    at State.score, db 0
 iend
 
 ; Check if the correct amount of memory is used
