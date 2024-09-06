@@ -127,7 +127,7 @@ main:
             jng .draw_paddle_loop
 
     .draw_score:
-        ; TODO
+        ; Loop around '9' and compare it to the score.
 
     .draw_ball:
         ; Draw the ball
