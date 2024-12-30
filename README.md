@@ -13,14 +13,13 @@ Programed in x86 assembly using NASM. Can use QEMU to run the program. The goal 
 
 Build and run the program:
 ```console
-$ nasm brick_breaker.asm -o brick_breaker
-$ qemu-system-x86_64 brick_breaker
+make run
 ```
 
 ## Controls
 
-- `m`, `p`: move racket sideways,
-- `r`: restart the game,
+- `n`, `e`: move racket sideways,
+- `f`: restart the game,
 - `space`: toggle pause.
 
 ## Linux Bootable USB stick

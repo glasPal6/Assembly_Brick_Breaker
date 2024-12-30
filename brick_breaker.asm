@@ -48,6 +48,7 @@ main:
     jmp .draw_paddle
 
     .loop:
+    ; TODO: Get the timer loop running here
         ; Get system time
         ;mov ah, 2dh
         ;int 0x21
