@@ -2,7 +2,9 @@
 
 ## Overview
 
-Programed in x86 assembly using NASM. Can use QEMU to run the program. The goal is to limit it to 512 bytes so that it fits within the bootloader. Inspired by [pinpog](https://github.com/tsoding/pinpog.git)
+Programed in x86 assembly using NASM. Can use QEMU to run the program. The goal is to limit it to 512 bytes so that it fits within the bootloader. Inspired by [pinpog](https://github.com/tsoding/pinpog.git).
+
+*The project is archived at the moment, till I have time to work on it*
 
 ## Dependencies
 
