@@ -33,7 +33,7 @@
     %define BALL_VELY 2
 
 struc State
-    .time: resb 1
+    .time: resw 1
     .paddle_x: resw 1
     ; paddle_y is a constant
     .ball_x: resw 1
@@ -252,7 +252,7 @@ set_graphics:
 
 state:
 istruc State
-    at State.time, db 0
+    at State.time, dw 255
     at State.paddle_x, dw 110
 
     ;at State.ball_x, dw 160
