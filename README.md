@@ -2,14 +2,20 @@
 
 ## Overview
 
-Programed in x86 assembly using NASM. Can use QEMU to run the program. The goal is to limit it to 512 bytes so that it fits within the bootloader. Inspired by [pinpog](https://github.com/tsoding/pinpog.git).
+Assembly Brick Breaker is a bootable program written in x86 Assembly using NASM. It leverages the bootloader to load directly onto an Intel architecture CPU. The program runs directly on the hardware, bypassing the operating system, which imposes strict size limits of 512 bytes for the boot sector code. Inspired by [pinpog](https://github.com/tsoding/pinpog.git).
 
-*The project is archived at the moment, till I have time to work on it*
+## Special Features
+
+- Operates as a bootloader-compatible executable.
+- Can boot on any Intel CPU without requiring an operating system.
+- Fully self-contained, working within the smallest necessary footprint.
+
+![Gameplay](gameplay.gif)
 
 ## Dependencies
 
-- [nasm]
-- [qemu]
+- [NASM] - The Netwide Assembler
+- [QEMU] - Processor Emulator to test the binary
 
 ## Quick Start
 
@@ -18,45 +24,55 @@ Build and run the program:
 make run
 ```
 
+For more minimal environments:
+- Build the binary directly:
+  ```bash
+  nasm brick_breaker.asm -o brick_breaker
+  ```
+
 ## Controls
 
-- `n`, `e`: move racket sideways,
-- `f`: restart the game,
-- `space`: toggle pause.
+- `N`, `E`: Move paddle sideways
+- `F`: Restart the game
+- `Space`: Toggle pause
 
-## Linux Bootable USB stick
+## Bootable USB
 
-[!Warning] - This could destroy your computer. Please use at your own risk.
+This program can be written to a USB for direct boot. As it occupies less than the boot sector's limit (512 bytes), it can easily be loaded in low-level environments. **Use at your own risk. Improperly writing to a USB can damage your system setup.**
 
-1. Build the image of the game: `$ make brick_breaker`
-2. Get a USB stick (at least 512 bytes Kappa)
-4. Get the USB block device [lsblk](https://linux.die.net/man/8/lsblk)
-5. Use [dd](https://linux.die.net/man/1/dd) to dump the image to the USB drive: `sudo dd if=./brick_breaker of=/dev/<usb-drive>`. Be careful with the drive name.
+### Steps:
+1. Build the binary:
+   ```bash
+   make brick_breaker
+   ```
+2. Plug in a USB stick.
+3. Find your USB block device:
+   ```bash
+   lsblk
+   ```
+4. Write the binary to the USB drive:
+   ```bash
+   sudo dd if=./brick_breaker of=/dev/<usb-drive>
+   ```
+   Be cautious; replacing `<usb-drive>` with an incorrect drive name can damage your system.
+
+5. Boot your system from the USB to start the game.
 
 ## TODO
 
-1. Score for a paddle bounce. And draw to the screen.
-2. Game over if it hits the bottom. Make it reload the initial state.
-3. Add a timer. Look at the timer interupt at 0070h.
-4. Make the drawing of the rectangles more efficient. Use multiple inputs and pointer registers.
-5. Add a brick to break and change scoring to that - if there is space left in the sector.
+1. Add scoring for paddle bounces and render to the screen.
+2. Implement game over logic when the ball hits the bottom.
+3. Add a timer interrupt (0x70).
+4. Optimize rectangle drawing using pointer registers.
+5. Introduce breakable bricks if space allows.
 
 ## Resources
 
-- [x86 and amd64 istruction reference](https://www.felixcloutier.com/x86/index.html)
-- [x86 and amd64 register reference Link 1](https://www.eecg.utoronto.ca/~amza/www.mindsec.com/files/x86regs.html)
-- [x86 and amd64 register reference Link 2](https://en.wikibooks.org/wiki/X86_Assembly/X86_Architecture)
-
-
+- [x86 and amd64 Instruction Reference](https://www.felixcloutier.com/x86/index.html)
 - [VGA Modes and Memory](https://wiki.osdev.org/Drawing_In_a_Linear_Framebuffer)
-- [Interupt 10h Link 1](http://www.ctyme.com/intr/int-10.htm)
-- [Interupt 10h Link 2 go to *int 10,0*](https://stanislavs.org/helppc/int_10.html)
+- [Interrupt 10h Documentation](https://stanislavs.org/helppc/int_10.html)
+- [Timer Interrupts Overview](http://www.ctyme.com/intr/rb-2703.htm)
 
+## Note
 
-- [Keyboard Interupts Link 1](http://www.ctyme.com/intr/int-16.htm)
-- [Keyboard Interupts 16h Link 2 go to *int 16,x*](https://stanislavs.org/helppc/int_16.html)
-
-
-- [Timer Interupts Link 1](http://www.ctyme.com/intr/rb-2703.htm)
-- [Timer Interupts Link 2](https://stanislavs.org/helppc/int_21.html)
-
+This program complies with the constraints for boot sector code. Designed to fit within 512 bytes, it is directly compatible with the bootloader requirements on Intel CPUs.
