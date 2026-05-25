@@ -10,7 +10,7 @@ Assembly Brick Breaker is a bootable program written in x86 Assembly using NASM.
 - Can boot on any Intel CPU without requiring an operating system.
 - Fully self-contained, working within the smallest necessary footprint.
 
-![Gameplay](gameplay.gif)
+![Gameplay](showcase.gif)
 
 ## Dependencies
 
